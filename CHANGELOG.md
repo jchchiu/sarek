@@ -5,7 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## dev
+## 3.7.0dev
+
+### Added
+
+### Changed
+
+### Fixed
+
+### Removed
+
+### Dependencies
+
+| Dependency | Old version | New version |
+| ---------- | ----------- | ----------- |
+
+### Parameters
+
+| Params | status |
+| ------ | ------ |
+
+### Developer section
+
+#### Added
+
+#### Changed
+
+- [2026](https://github.com/nf-core/sarek/pull/2026) - Back to dev
+
+#### Fixed
+
+#### Removed
+
+## [3.6.0](https://github.com/nf-core/sarek/releases/tag/3.6.0) - Kvikkjokk
+
+Kvikkjokk is a village where many trails start that lead through sarek.
 
 ### Added
 
@@ -24,8 +58,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [1937](https://github.com/nf-core/sarek/pull/1937) - Use fgbio plugin to check read structure parameter is valid
 - [1938](https://github.com/nf-core/sarek/pull/1938) - Add checks for uniqueness of sample ids and lane ids
 - [1939](https://github.com/nf-core/sarek/pull/1939) - Modify config to add readgroups to fq2bam
+- [1940](https://github.com/nf-core/sarek/pull/1940) - Add varlociraptor for variant calling
 - [1953](https://github.com/nf-core/sarek/pull/1953) - Update freebayes and add QUAL filtering
-- [1965](https://github.com/nf-core/sarek/pull/1965) - Add msisensor2
+- [1965](https://github.com/nf-core/sarek/pull/1965),[2017](https://github.com/nf-core/sarek/pull/2017) - Add msisensor2
+- [1973](https://github.com/nf-core/sarek/pull/1973) - Update bcftools/annotate to pick up columns file input
+- [2021](https://github.com/nf-core/sarek/pull/2021),[1983](https://github.com/nf-core/sarek/pull/1983) - Add BBsplit
 
 ### Changed
 
@@ -42,6 +79,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [1982](https://github.com/nf-core/sarek/pull/1982) - Update ensemblvep modules to 115.1
 - [1988](https://github.com/nf-core/sarek/pull/1988) - Update manta modules to latest build
 - [1993](https://github.com/nf-core/sarek/pull/1993) - Update snpeff modules to 5.3.0a and ensemblvep modules to 115.2
+- [2003](https://github.com/nf-core/sarek/pull/2003),[2005](https://github.com/nf-core/sarek/pull/2005) - Update subway map to clarify post-variantcalling processing options, and add BBSplit
+- [2009](https://github.com/nf-core/sarek/pull/2009) - Update multiqc module to 1.31
+- [2011](https://github.com/nf-core/sarek/pull/2011) - Downgrade snpeff db to at least 99 due to 105 not being available at the moment
 
 ### Fixed
 
@@ -73,32 +113,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | `mosdepth`                             | 0.3.8       | 0.3.10      |
 | `msisensor2`                           |             | 0.1         |
 | `msisensorpro`                         | 1.2.0       | 1.3.0       |
-| `multiqc`                              | 1.25.1      | 1.30        |
+| `multiqc`                              | 1.25.1      | 1.31        |
 | `muse`                                 |             | 2.1.2       |
 | `parabricks`                           |             | 4.5.1-1     |
+| `rbt`                                  |             | 0.42.2      |
 | `samblaster`                           | 0.1.26      | removed     |
 | `samtools` (in `BWAMEM1_MEM`)          | 1.2         | 1.21        |
 | `samtools` (in `BWAMEM2_MEM`)          | 1.19.2      | 1.21        |
 | `samtools` (in `GATK4_MARKDUPLICATES`) | 1.19.2      | 1.21        |
 | `sentieon`                             | 202308.03   | 202503.01   |
-| `snpeff`                               | 5.1         | 5.3.0a      |
+| `snpeff`                               | 5.1         | 5.3a        |
 | `tabix`                                | 1.2         | 1.21        |
+| `varlociraptor`                        |             | 8.7.4       |
 | `vcflib`                               |             | 1.0.14      |
+| `yte`                                  |             | 1.9.0       |
 
 ### Parameters
 
-| Params                 | status |
-| ---------------------- | ------ |
-| `--freebayes_filter`   | New    |
-| `--msisensor2_models`  | New    |
-| `--msisensor2_scan`    | New    |
-| `--msisensorpro_scan`  | New    |
-| `--sentieon_consensus` | New    |
-| `--umi_base_skip`      | New    |
-| `--umi_in_read_header` | New    |
-| `--umi_length`         | New    |
-| `--umi_location`       | New    |
-| `--umi_tag`            | New    |
+| Params                                | status |
+| ------------------------------------- | ------ |
+| `--freebayes_filter`                  | New    |
+| `--msisensor2_models`                 | New    |
+| `--msisensorpro_scan`                 | New    |
+| `--sentieon_consensus`                | New    |
+| `--umi_base_skip`                     | New    |
+| `--umi_in_read_header`                | New    |
+| `--umi_length`                        | New    |
+| `--umi_location`                      | New    |
+| `--umi_tag`                           | New    |
+| `--varlociraptor_chunk_size`          | New    |
+| `--varlociraptor_scenario_germline`   | New    |
+| `--varlociraptor_scenario_somatic`    | New    |
+| `--varlociraptor_scenario_tumor_only` | New    |
 
 ### Developer section
 
@@ -162,6 +208,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [1977](https://github.com/nf-core/sarek/pull/1977) - Update sentieon modules to adhere to language server
 - [1985](https://github.com/nf-core/sarek/pull/1985) - Update subway maps and workflow pictures to include msisensor2 following [1965](https://github.com/nf-core/sarek/pull/1965)
 - [1990](https://github.com/nf-core/sarek/pull/1990) - Update parabricks/fq2bam to 4.5.1-1
+- [2001](https://github.com/nf-core/sarek/pull/2001) - Remove lofreq VCF MD5sum - use summary
+- [2007](https://github.com/nf-core/sarek/pull/2007) - Sort tools in test_full configs and add msisensor2
+- [2008](https://github.com/nf-core/sarek/pull/2008), [2010](https://github.com/nf-core/sarek/pull/2010) - Skip conda tests that cannot be run due to lacking dependencies
+- [2014](https://github.com/nf-core/sarek/pull/2014) - Prepare release and address comments
 
 #### Fixed
 
@@ -182,6 +232,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [1935](https://github.com/nf-core/sarek/pull/1935) - Fix bug in samplesheet_to_channel workflow due to bad integer handling with lane
 - [1984](https://github.com/nf-core/sarek/pull/1984) - Fix tuple mismatch in GATK_BASERECALIBRATOR
 - [1996](https://github.com/nf-core/sarek/pull/1996) - MuSE: change to htslib for bgzip and tabix & language server
+- [1998](https://github.com/nf-core/sarek/pull/1998) - Adjust VEP versions in snap files with corrected module
+- [2002](https://github.com/nf-core/sarek/pull/2002) - Update strelka to specific build to fix error in somatic mode
+- [2013](https://github.com/nf-core/sarek/pull/2013) - Fix snaps after MultiQC update
+- [2019](https://github.com/nf-core/sarek/pull/2019) - Allow other cloud buckets than `s3://annotation-cache/` for the VEP and snpEff cache
 
 #### Removed
 
@@ -192,6 +246,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [1994](https://github.com/nf-core/sarek/pull/1994) - Prevent conda profile running on gpu
 - [1995](https://github.com/nf-core/sarek/pull/1995) - Remove md5sums of png files for controlfreec
 - [1997](https://github.com/nf-core/sarek/pull/1997) - Remove png and pdf md5sums for all variant callers
+- [2004](https://github.com/nf-core/sarek/pull/2004) - Remove .cram.metrics and .cram.metrics.multiqc.tsv md5sums for sentieon
 
 ## [3.5.1](https://github.com/nf-core/sarek/releases/tag/3.5.1) - Akkatjåkkå
 

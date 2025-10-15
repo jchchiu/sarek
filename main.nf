@@ -51,7 +51,6 @@ params.known_snps_tbi          = getGenomeAttribute('known_snps_tbi')
 params.known_snps_vqsr         = getGenomeAttribute('known_snps_vqsr')
 params.mappability             = getGenomeAttribute('mappability')
 params.msisensor2_models       = getGenomeAttribute('msisensor2_models')
-params.msisensor2_scan         = getGenomeAttribute('msisensor2_scan')
 params.msisensorpro_scan       = getGenomeAttribute('msisensorpro_scan')
 params.ngscheckmate_bed        = getGenomeAttribute('ngscheckmate_bed')
 params.pon                     = getGenomeAttribute('pon')
@@ -96,7 +95,8 @@ workflow NFCORE_SAREK {
 
     // Initialize file channels based on params, defined in the params.genomes[params.genome] scope
     bcftools_annotations    = params.bcftools_annotations    ? Channel.fromPath(params.bcftools_annotations).collect()    : Channel.empty()
-    bcftools_header_lines   = params.bcftools_header_lines   ? Channel.fromPath(params.bcftools_header_lines).collect()   : Channel.empty()
+    bcftools_columns        = params.bcftools_columns        ? Channel.fromPath(params.bcftools_columns).collect()        : Channel.value([])
+    bcftools_header_lines   = params.bcftools_header_lines   ? Channel.fromPath(params.bcftools_header_lines).collect()   : Channel.value([])
     cf_chrom_len            = params.cf_chrom_len            ? Channel.fromPath(params.cf_chrom_len).collect()            : []
     dbsnp                   = params.dbsnp                   ? Channel.fromPath(params.dbsnp).collect()                   : Channel.value([])
     fasta_fai               = params.fasta_fai               ? Channel.fromPath(params.fasta_fai).collect()               : Channel.empty()
@@ -125,8 +125,7 @@ workflow NFCORE_SAREK {
     if (params.dbnsfp && params.dbnsfp_tbi) {
         vep_extra_files.add(file(params.dbnsfp, checkIfExists: true))
         vep_extra_files.add(file(params.dbnsfp_tbi, checkIfExists: true))
-    }
-    else if (params.dbnsfp && !params.dbnsfp_tbi) {
+    } else if (params.dbnsfp && !params.dbnsfp_tbi) {
         System.err.println("DBNSFP: ${params.dbnsfp} has been provided with `--dbnsfp, but no dbnsfp_tbi has")
         System.err.println("cf: https://nf-co.re/sarek/parameters/#dbnsfp")
         error("Execution halted due to dbnsfp inconsistency.")
@@ -153,10 +152,11 @@ workflow NFCORE_SAREK {
         known_indels,
         known_snps,
         params.msisensor2_models,
-        params.msisensor2_scan,
         params.msisensorpro_scan,
         pon,
         params.tools?:"no_tools",
+        params.bbsplit_fasta_list,
+        params.bbsplit_index
     )
 
     // Gather built indices or get them from the params
@@ -176,6 +176,9 @@ workflow NFCORE_SAREK {
     dragmap = params.dragmap
         ? Channel.fromPath(params.dragmap).map { it -> [[id: 'dragmap'], it] }.collect()
         : PREPARE_GENOME.out.hashtable
+
+    // Get bbsplit index from PREPARE_GENOME output
+    bbsplit_index_prepared     = PREPARE_GENOME.out.bbsplit_index
 
     // Gather index for mapping given the chosen aligner
     aligner = params.aligner
@@ -236,8 +239,7 @@ workflow NFCORE_SAREK {
             cnvkit_reference = PREPARE_REFERENCE_CNVKIT.out.cnvkit_reference
             versions = versions.mix(PREPARE_REFERENCE_CNVKIT.out.versions)
         }
-    }
-    else {
+    } else {
         cnvkit_reference = Channel.value([])
     }
     // Gather used softwares versions
@@ -256,8 +258,7 @@ workflow NFCORE_SAREK {
         vep_cache = DOWNLOAD_CACHE_SNPEFF_VEP.out.ensemblvep_cache.map { meta, cache -> [cache] }
 
         versions = versions.mix(DOWNLOAD_CACHE_SNPEFF_VEP.out.versions)
-    }
-    else {
+    } else {
         // Looks for cache information either locally or on the cloud
         ANNOTATION_CACHE_INITIALISATION(
             (params.snpeff_cache && params.tools && (params.tools.split(',').contains("snpeff") || params.tools.split(',').contains('merge'))),
@@ -285,6 +286,7 @@ workflow NFCORE_SAREK {
         aligner,
         bcftools_annotations,
         bcftools_annotations_tbi,
+        bcftools_columns,
         bcftools_header_lines,
         cf_chrom_len,
         PREPARE_GENOME.out.chr_files,
@@ -314,7 +316,6 @@ workflow NFCORE_SAREK {
         PREPARE_GENOME.out.loci_files,
         mappability,
         PREPARE_GENOME.out.msisensor2_models,
-        PREPARE_GENOME.out.msisensor2_scan,
         PREPARE_GENOME.out.msisensorpro_scan,
         ngscheckmate_bed,
         pon,
@@ -328,6 +329,7 @@ workflow NFCORE_SAREK {
         vep_fasta,
         vep_genome,
         vep_species,
+        bbsplit_index_prepared,
         versions,
     )
 

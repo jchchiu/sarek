@@ -26,6 +26,7 @@ include { FASTQC                                            } from '../../module
 // QC on CRAM
 include { CRAM_SAMPLEQC                                     } from '../../subworkflows/local/cram_sampleqc'
 
+
 // Preprocessing
 include { FASTQ_PREPROCESS_GATK                             } from '../../subworkflows/local/fastq_preprocess_gatk'
 include { FASTQ_PREPROCESS_PARABRICKS                       } from '../../subworkflows/local/fastq_preprocess_parabricks'
@@ -67,6 +68,7 @@ workflow SAREK {
     aligner
     bcftools_annotations
     bcftools_annotations_tbi
+    bcftools_columns
     bcftools_header_lines
     cf_chrom_len
     chr_files
@@ -96,7 +98,6 @@ workflow SAREK {
     loci_files
     mappability
     msisensor2_models
-    msisensor2_scan
     msisensorpro_scan
     ngscheckmate_bed
     pon
@@ -110,6 +111,7 @@ workflow SAREK {
     vep_fasta
     vep_genome
     vep_species
+    bbsplit_index
     versions
 
     main:
@@ -119,6 +121,13 @@ workflow SAREK {
     multiqc_report   = Channel.empty()
     reports          = Channel.empty()
 
+    /*
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        VALIDATE INPUTS
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    */
+
+    // PREPROCESSING
     if (params.step == 'mapping') {
         // Figure out if input is bam, fastq, or spring
         input_sample_type = input_sample.branch {
@@ -225,6 +234,7 @@ workflow SAREK {
                 intervals_for_preprocessing,
                 known_sites_indels,
                 known_sites_indels_tbi,
+                bbsplit_index
             )
 
             // Gather preprocessing output
@@ -352,11 +362,12 @@ workflow SAREK {
             .map { normal, tumor ->
                 def meta = [:]
 
-                meta.id        = "${tumor[1].sample}_vs_${normal[1].sample}".toString()
-                meta.normal_id = normal[1].sample
-                meta.patient   = normal[0]
-                meta.sex       = normal[1].sex
-                meta.tumor_id  = tumor[1].sample
+                meta.id            = "${tumor[1].sample}_vs_${normal[1].sample}".toString()
+                meta.normal_id     = normal[1].sample
+                meta.patient       = normal[0]
+                meta.sex           = normal[1].sex
+                meta.tumor_id      = tumor[1].sample
+                meta.contamination = tumor[1].contamination
 
                 [meta, normal[2], normal[3], tumor[2], tumor[3]]
             }
@@ -469,7 +480,6 @@ workflow SAREK {
             intervals_bed_combined,
             intervals_bed_gz_tbi_combined,
             mappability,
-            msisensor2_scan,
             msisensorpro_scan,
             pon,
             pon_tbi,
@@ -482,14 +492,19 @@ workflow SAREK {
         )
 
         // POST VARIANTCALLING
-        POST_VARIANTCALLING(
-            BAM_VARIANT_CALLING_GERMLINE_ALL.out.vcf_all,
-            BAM_VARIANT_CALLING_TUMOR_ONLY_ALL.out.vcf_all,
-            BAM_VARIANT_CALLING_SOMATIC_ALL.out.vcf_all,
-            fasta,
-            params.concatenate_vcfs,
-            params.normalize_vcfs,
-        )
+        POST_VARIANTCALLING(params.tools,
+                cram_variant_calling_status_normal,
+                BAM_VARIANT_CALLING_GERMLINE_ALL.out.vcf_all,
+                cram_variant_calling_tumor_only,
+                BAM_VARIANT_CALLING_TUMOR_ONLY_ALL.out.vcf_all,
+                cram_variant_calling_pair,
+                BAM_VARIANT_CALLING_SOMATIC_ALL.out.vcf_all,
+                fasta,
+                fasta_fai,
+                params.concatenate_vcfs,
+                params.normalize_vcfs,
+                params.varlociraptor_chunk_size,
+            )
 
         // Gather vcf files for annotation and QC
         vcf_to_annotate = Channel.empty()
@@ -554,6 +569,7 @@ workflow SAREK {
                 vep_extra_files,
                 bcftools_annotations,
                 bcftools_annotations_tbi,
+                bcftools_columns,
                 bcftools_header_lines,
             )
 
